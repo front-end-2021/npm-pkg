@@ -2,17 +2,16 @@
  * install on git: git+https://github.com/visionmedia/express.git
  * or:             git+ssh://git@github.com/visionmedia/express.git
  * @param {*} options {
- *  mainWidth: number, 
- *  viewWidth: number, 
- *  height: number},
- *  slides: array[{ src }]
+ *   mainWidth: number (default = empty), 
+ *   viewWidth: number, 
+ *   height: number (default = empty),
+ *   slides: array[{ src: 'string }]
  *  }
  */
 
 const colSlider = (options) => {
     let _options = {
-        mainWidth: 240,
-        viewWidth: 320,
+        viewWidth: 320,     //mainWidth: 240,
         height: 426, // 4 : 3
         current: {
             bg: 'white',
@@ -37,32 +36,28 @@ const colSlider = (options) => {
             setDragScale();
 
             _options.element.addEventListener('mouseup', dnbColSliderDragEnd);
-            _options.element.addEventListener('mouseleave', function dnbColSliderMouseOut(e) {
-                dnbColSliderDragEnd();
+            _options.element.addEventListener('mouseleave', function (e) {
+                dnbColSliderDragEnd(e);
             });
 
-            const thisRef = this;
-            return new Promise((resolve) => {
-                // resolve(data);
-            });
+            // const thisRef = this;
+            // return new Promise((resolve) => {
+            //     // resolve(data);
+            // });
         }
     }
     function addStyle() {
-        const css = `.dnb-col-slide > div[class^="cs-"] > * {
-            box-sizing: border-box; background-color: green; border-left: 1px solid white;
-          }
-          .dnb-col-slide > div[class^="cs-"] > *:first-child { border-left: none; }
-          .dnb-col-slide > div[class^="cs-"] > .active { background-color: black; }
-          .dnb-col-slide .dnb-cs-item-bg {
-            filter: blur(9px); -webkit-filter: blur(9px);
-            -moz-filter: blur(9px); -o-filter: blur(9px);
-            -ms-filter: blur(9px); position: absolute;
-            top: -9px; left: -9px; z-index: 0;
-          }`;
+        const css = `.dnb-col-slide > div[class^="cs-"] > * {box-sizing: border-box;background-color: green;border-left: 1px solid white;}
+        .dnb-col-slide .dnb-all-transition {transition: all .21s ease-out;}
+        .dnb-col-slide > div[class^="cs-"] > *:first-child {border-left: none;}
+        .dnb-col-slide > div[class^="cs-"] > .active {background-color: black;}
+        .dnb-col-slide .dnb-cs-item-bg {
+          filter: blur(9px); -webkit-filter: blur(9px);-moz-filter: blur(9px); -o-filter: blur(9px);
+          -ms-filter: blur(9px); position: absolute;top: -9px; left: -9px; z-index: 0;
+        }`;
         var head = document.head || document.getElementsByTagName('head')[0],
             style = document.createElement('style');
 
-        style.type = 'text/css';
         head.appendChild(style);
         if (style.styleSheet) { // This is required for IE8 and below.
             style.styleSheet.cssText = css;
@@ -185,8 +180,9 @@ const colSlider = (options) => {
     }
     function dnbColSliderDragEnd(e) {
         if (_options.ScaleDown == undefined) return;
-        if (!!e && e.type == 'mouseup') {
-            _options.ScaleDown.removeEventListener('mousemove', dnbColSliderDragging);
+        if (!!e) {
+            if (e.type == 'mouseup' || e.type == 'mouseleave')
+                _options.ScaleDown.removeEventListener('mousemove', dnbColSliderDragging);
         }
 
         if (_options.ScaleUp == undefined) return;
@@ -215,6 +211,7 @@ const colSlider = (options) => {
 
     function getMainWidth() {
         let _main = _options.viewWidth * 0.75;
+        if (typeof _options.mainWidth == 'number') _main = _options.mainWidth;
         return Math.ceil(_main);
     }
 
