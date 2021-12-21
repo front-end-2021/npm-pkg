@@ -118,7 +118,6 @@ const colSlider = (options) => {
             return null;
     }
 
-
     function setDragScale() {
 
         var wrap = document.querySelector(`.${DNB_BOX}`);
@@ -126,12 +125,27 @@ const colSlider = (options) => {
         elmActive = elmActive[0];
         _options.ScaleDown = elmActive;
 
-        elmActive.addEventListener('mousedown', dnbColSliderDragStart);
-        elmActive.addEventListener('touchstart', dnbColSliderDragStart);
-        elmActive.addEventListener('touchend', dnbColSliderDragEnd);
-        elmActive.addEventListener('touchmove', dnbColSliderDragging);
+        _options.ScaleDown.addEventListener('mousedown', dnbColSliderDragStart);
+        _options.ScaleDown.addEventListener('touchstart', dnbColSliderDragStart);
+        _options.ScaleDown.addEventListener('touchend', dnbColSliderDragEnd);
+        _options.ScaleDown.addEventListener('touchmove', dnbColSliderDragging);
+    }
+
+    function addTransitionAll() {
+        if (!_options.ScaleDown.classList.contains('dnb-all-transition'))
+            _options.ScaleDown.classList.add('dnb-all-transition');
+
+        if (!_options.ScaleUp.classList.contains('dnb-all-transition'))
+            _options.ScaleUp.classList.add('dnb-all-transition');
+    }
+    function clearTransitionAll() {
+        const matches = document.querySelectorAll('.dnb-all-transition');
+        matches.forEach(function (item) {
+            item.classList.remove('dnb-all-transition');
+        });
     }
     function dnbColSliderDragStart(e) {
+        clearTransitionAll();
         e = e || window.event;
         e.preventDefault();
 
@@ -154,7 +168,7 @@ const colSlider = (options) => {
         } else if (_dX > 0) {
             _options.ScaleUp = _options.ScaleDown.previousSibling;
         }
-        _dX = _options.WidthMax - Math.abs(_dX);
+        _dX = _options.WidthMax - Math.abs(_dX) * 0.9;
         _dX = _dX / _options.WidthMax;
         (_dX < 0.25) && (_dX = 0.25)
 
@@ -171,10 +185,12 @@ const colSlider = (options) => {
     }
     function dnbColSliderDragEnd(e) {
         if (_options.ScaleDown == undefined) return;
-        if (!!e && e.type == 'mouseup')
+        if (!!e && e.type == 'mouseup') {
             _options.ScaleDown.removeEventListener('mousemove', dnbColSliderDragging);
+        }
 
         if (_options.ScaleUp == undefined) return;
+        addTransitionAll();
         if (_options.deltaX == undefined) return;
 
         if (_options.deltaX < 0.45) {
