@@ -13,11 +13,12 @@ const colSlider = (options) => {
     let _options = {
         viewWidth: 320,     //mainWidth: 240,
         height: 426, // 4 : 3
-        current: {
-            bg: 'white',
-            color: 'black',
-            index: 0
-        },
+        transitionTime: 0.45,
+        // current: {
+        //     bg: 'white',
+        //     color: 'black',
+        //     index: 0
+        // },
         slides: []
     };
     if (!!options)
@@ -28,10 +29,13 @@ const colSlider = (options) => {
     const DNB_BOX = `cs-${DATE_NOW}`;
     const DNB_SUBVIEW = `cs-${DATE_NOW}-sub-view`;
     const DNB_MAINVIEW = `cs-${DATE_NOW}-main-view`;
+    const DNB_ITEM_BG = `dnb-cs-${DATE_NOW}-item-bg`;
 
     return {
         append: function (parent) {
-            if (!_options.style) _options.style = addStyle();
+            if (!document) return;//'This package support for web-app';
+
+            if (!_options.style) _options.style = addStyle(parent);
             _options.element = genElements(parent);
             setDragScale();
 
@@ -39,26 +43,20 @@ const colSlider = (options) => {
             _options.element.addEventListener('mouseleave', function (e) {
                 dnbColSliderDragEnd(e);
             });
-
-            // const thisRef = this;
-            // return new Promise((resolve) => {
-            //     // resolve(data);
-            // });
         }
     }
-    function addStyle() {
-        const css = `.dnb-col-slide > div[class^="cs-"] > * {box-sizing: border-box;background-color: green;border-left: 1px solid white;}
-        .dnb-col-slide .dnb-all-transition {transition: all .21s ease-out;}
-        .dnb-col-slide > div[class^="cs-"] > *:first-child {border-left: none;}
-        .dnb-col-slide > div[class^="cs-"] > .active {background-color: black;}
-        .dnb-col-slide .dnb-cs-item-bg {
-          filter: blur(9px); -webkit-filter: blur(9px);-moz-filter: blur(9px); -o-filter: blur(9px);
-          -ms-filter: blur(9px); position: absolute;top: -9px; left: -9px; z-index: 0;
-        }`;
-        var head = document.head || document.getElementsByTagName('head')[0],
-            style = document.createElement('style');
+    function addStyle(parent) {
+        if (!document) return;
+        const css = `.${DNB_COL_SLIDE} > div[class^="cs-"] > * {box-sizing: border-box;background-color: green;border-left: 1px solid white;}
+        .${DNB_COL_SLIDE} .dnb-all-transition {transition: all ${_options.transitionTime}s ease-out;}
+        .${DNB_COL_SLIDE} > div[class^="cs-"] > *:first-child {border-left: none;}
+        .${DNB_COL_SLIDE} > div[class^="cs-"] > .active {background-color: black;}
+        .${DNB_COL_SLIDE} .${DNB_ITEM_BG} { filter: blur(9px); -webkit-filter: blur(9px);-moz-filter: blur(9px); -o-filter: blur(9px);
+          -ms-filter: blur(9px); position: absolute;top: -9px; left: -9px; z-index: 0; }`;
+        var p = document.querySelector(parent);// document.head || document.getElementsByTagName('head')[0];
+        var style = document.createElement('style');
 
-        head.appendChild(style);
+        p.appendChild(style);
         if (style.styleSheet) { // This is required for IE8 and below.
             style.styleSheet.cssText = css;
         } else {
@@ -73,7 +71,6 @@ const colSlider = (options) => {
     }
 
     function getElement(parent) {
-        if (!document) return 'This package support for web-app';
         let _e = document.querySelector(`.${DNB_COL_SLIDE}`);
         if (!!_e) {
             let _p = document.querySelector(parent);
@@ -265,7 +262,7 @@ const colSlider = (options) => {
     }
     function getBg(img, parent) {
         let _e = document.createElement('DIV');
-        _e.setAttribute('class', 'dnb-cs-item-bg');
+        _e.setAttribute('class', DNB_ITEM_BG);
         _e.style.backgroundImage = `url(${img.src})`;
         _e.style.width = `${getMainWidth() + 23}px`;
         _e.style.height = `${getHeight() + 23}px`;
