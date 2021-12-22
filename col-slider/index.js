@@ -1,12 +1,13 @@
 /** col-slider npm
  * install on git: git+https://github.com/visionmedia/express.git
  * or:             git+ssh://git@github.com/visionmedia/express.git
- * @param {*} options {
- *   mainWidth: number (default = empty), 
- *   viewWidth: number, 
- *   height: number (default = empty),
- *   slides: array[{ src: 'string }]
- *  }
+ * 
+ * @param mainWidth: number (default = empty), 
+ * @param viewWidth: number, 
+ * @param height: number (default = empty),
+ * @param slides: array[{ src: 'string }]
+ * @param transitionTime: number 0 -> 1
+ *  
  */
 
 const colSlider = (options) => {
@@ -47,8 +48,11 @@ const colSlider = (options) => {
     }
     function addStyle(parent) {
         if (!document) return;
+        var tTime = _options.transitionTime;
+        tTime = typeof tTime == 'number' ? tTime : 0.45;
+        tTime = tTime < 0 ? 0.45 : (tTime > 3 ? 3 : tTime);
         const css = `.${DNB_COL_SLIDE} > div[class^="cs-"] > * {box-sizing: border-box;background-color: green;border-left: 1px solid white;}
-        .${DNB_COL_SLIDE} .dnb-all-transition {transition: all ${_options.transitionTime}s ease-out;}
+        .${DNB_COL_SLIDE} .dnb-all-transition {transition: all ${tTime}s ease-out;}
         .${DNB_COL_SLIDE} > div[class^="cs-"] > *:first-child {border-left: none;}
         .${DNB_COL_SLIDE} > div[class^="cs-"] > .active {background-color: black;}
         .${DNB_COL_SLIDE} .${DNB_ITEM_BG} { filter: blur(9px); -webkit-filter: blur(9px);-moz-filter: blur(9px); -o-filter: blur(9px);
