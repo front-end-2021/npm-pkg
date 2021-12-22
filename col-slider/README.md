@@ -59,5 +59,7 @@ function MainBody() {
 
 ```
 [![Demo col-slider in React App](https://img.youtube.com/vi/G27LJT9HlbA/0.jpg)](https://www.youtube.com/watch?v=G27LJT9HlbA)
+
+### Source code [Github](https://github.com/front-end-2021/npm-pkg/tree/main/col-slider)
+
 ###### The version 1.0.x present images
-###### The version 1.0.0 => 1.0.7 only change the README file (the first time I public a npm package)
