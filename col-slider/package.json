@@ -1,0 +1,24 @@
+{
+  "name": "col-slider",
+  "version": "1.1.0",
+  "description": "slide image or content block in frame divided by column around the center view",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "slide",
+    "slide",
+    "column",
+    "col-slide",
+    "column",
+    "slider",
+    "col",
+    "slider"
+  ],
+  "author": "Dainb_",
+  "license": "ISC",
+  "files": [
+    "./*.css"
+  ]
+}

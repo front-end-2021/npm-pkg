@@ -52,7 +52,7 @@ const colSlider = (options) => {
         tTime = typeof tTime == 'number' ? tTime : 0.45;
         tTime = tTime < 0 ? 0.45 : (tTime > 3 ? 3 : tTime);
         const css = `.${DNB_COL_SLIDE} > div[class^="cs-"] > * {box-sizing: border-box;background-color: green;border-left: 1px solid white;}
-        .${DNB_COL_SLIDE} .dnb-all-transition {transition: all ${tTime}s ease-out;}
+        .${DNB_COL_SLIDE} .dnb-all-transition {transition: all ${tTime}s cubic-bezier(0.25,1,0.5,1);}
         .${DNB_COL_SLIDE} > div[class^="cs-"] > *:first-child {border-left: none;}
         .${DNB_COL_SLIDE} > div[class^="cs-"] > .active {background-color: black;}
         .${DNB_COL_SLIDE} .${DNB_ITEM_BG} { filter: blur(9px); -webkit-filter: blur(9px);-moz-filter: blur(9px); -o-filter: blur(9px);
@@ -164,7 +164,7 @@ const colSlider = (options) => {
         } else if (_dX > 0) {
             _options.ScaleUp = _options.ScaleDown.previousSibling;
         }
-        _dX = _options.WidthMax - Math.abs(_dX) * 0.9;
+        _dX = _options.WidthMax - Math.abs(_dX) * 1.38;
         _dX = _dX / _options.WidthMax;
         (_dX < 0.25) && (_dX = 0.25)
 
@@ -248,9 +248,9 @@ const colSlider = (options) => {
     }
     function genViewMainAndSubs(parent) {
         const _sIndex = 0;
-
+        let _e;
         for (let i = 0, len = sumViews(); i < len; i++) {
-            let _e = document.createElement('DIV');
+            _e = document.createElement('DIV');
             _e.setAttribute('data-index', `${i}`);
             setStyle(_e, i === _sIndex);
             if (i === _sIndex) {
@@ -261,6 +261,7 @@ const colSlider = (options) => {
                 parent.appendChild(_e);
             }
             getBg(getItem(i), _e);
+            _e = renderFlexBox(_e);
             getImg(getItem(i), _e);
         }
     }
@@ -272,12 +273,21 @@ const colSlider = (options) => {
         _e.style.height = `${getHeight() + 23}px`;
         parent.appendChild(_e);
     }
+    function renderFlexBox(parent) {
+        let _e = document.createElement('DIV');
+        _e.style.position = 'relative';
+        _e.style.display = 'flex';
+        _e.style.alignItems = 'center';
+        _e.style.justifyContent = 'space-around';
+        _e.style.height = `${getHeight()}px`;
+        parent.appendChild(_e);
+        return _e;
+    }
     function getImg(img, parent) {
         let _e = document.createElement('IMG');
         _e.src = img.src;
         _e.alt = img.alt || 'image for preview';
         _e.style.index = 1;
-        _e.style.position = 'relative';
         _e.style.maxHeight = `${getHeight()}px`;
         _e.style.maxWidth = `${getMainWidth()}px`;
         parent.appendChild(_e);
