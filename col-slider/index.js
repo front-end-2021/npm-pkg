@@ -322,7 +322,7 @@ const colSlider = (options) => {
     function getImg(img, parent) {
         let _e = document.createElement('IMG');
         _e.src = img.src;
-        _e.alt = img.alt || 'image for preview';
+        _e.alt = img.alt || 'slide image in column style';
         _e.style.index = 1;
         _e.style.borderRadius = '3px';
         _e.style.maxHeight = `${getHeight()}px`;
