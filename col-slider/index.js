@@ -2,24 +2,18 @@
  * install on git: git+https://github.com/visionmedia/express.git
  * or:             git+ssh://git@github.com/visionmedia/express.git
  * 
- * @param mainWidth: number (default = empty), 
- * @param viewWidth: number, 
- * @param height: number (default = empty),
+ * @param mainWidth: undefined || number || string  = 'xx%',
+ * @param viewWidth: undefined (100%) || number (the size of view),
+ * @param height: undefined (426px) || number,
  * @param slides: array[{ src: 'string }]
  * @param transitionTime: number 0 -> 1
- *  
  */
 
 const colSlider = (options) => {
     let _options = {
-        viewWidth: 320,     //mainWidth: 240,
+        //mainWidth: 240,
         height: 426, // 4 : 3
         transitionTime: 0.45,
-        // current: {
-        //     bg: 'white',
-        //     color: 'black',
-        //     index: 0
-        // },
         slides: []
     };
     if (!!options)
@@ -30,6 +24,7 @@ const colSlider = (options) => {
     const DNB_BOX = `cs-${DATE_NOW}`;
     const DNB_SUBVIEW = `cs-${DATE_NOW}-sub-view`;
     const DNB_MAINVIEW = `cs-${DATE_NOW}-main-view`;
+    const DNB_ITEM = `cs-item-${DATE_NOW}`;
     const DNB_ITEM_BG = `dnb-cs-${DATE_NOW}-item-bg`;
 
     return {
@@ -51,12 +46,13 @@ const colSlider = (options) => {
         var tTime = _options.transitionTime;
         tTime = typeof tTime == 'number' ? tTime : 0.45;
         tTime = tTime < 0 ? 0.45 : (tTime > 3 ? 3 : tTime);
-        const css = `.${DNB_COL_SLIDE} > div[class^="cs-"] > * {box-sizing: border-box;background-color: green;border-left: 1px solid white;}
+        const css = `.${DNB_COL_SLIDE} .${DNB_ITEM} {box-sizing: border-box;background-color: green;border-left: 1px solid white;position:relative}
+        .${DNB_COL_SLIDE} .${DNB_ITEM} {overflow:hidden;display:inline-block;min-height:${getHeight()}px;max-height:${getHeight()}px;}
         .${DNB_COL_SLIDE} .dnb-all-transition {transition: all ${tTime}s cubic-bezier(0.25,1,0.5,1);}
-        .${DNB_COL_SLIDE} > div[class^="cs-"] > *:first-child {border-left: none;}
-        .${DNB_COL_SLIDE} > div[class^="cs-"] > .active {background-color: black;}
-        .${DNB_COL_SLIDE} .${DNB_ITEM_BG} { filter: blur(9px); -webkit-filter: blur(9px);-moz-filter: blur(9px); -o-filter: blur(9px);
-          -ms-filter: blur(9px); position: absolute;top: -9px; left: -9px; z-index: 0; }`;
+        .${DNB_COL_SLIDE} .${DNB_ITEM}:first-child {border-left: none;}
+        .${DNB_COL_SLIDE} .${DNB_ITEM}.active {background-color: black;}
+        .${DNB_COL_SLIDE} .${DNB_ITEM_BG} {filter:blur(12px);-webkit-filter:blur(12px);-moz-filter:blur(12px);-o-filter:blur(12px);
+          -ms-filter:blur(12px);position: absolute;top: -9px;left: -9px;z-index: 0;width: 100%;height:100%;transform: scale(1.2);}`;
         var p = document.querySelector(parent);// document.head || document.getElementsByTagName('head')[0];
         var style = document.createElement('style');
 
@@ -115,7 +111,6 @@ const colSlider = (options) => {
     }
 
     function setDragScale() {
-
         var wrap = document.querySelector(`.${DNB_BOX}`);
         var elmActive = wrap.getElementsByClassName('active');
         elmActive = elmActive[0];
@@ -151,8 +146,8 @@ const colSlider = (options) => {
             _options.PosX1 = e.clientX;
             _options.ScaleDown.addEventListener('mousemove', dnbColSliderDragging);
         }
-        _options.WidthMax = getMainWidth();
-        _options.WidthBox = getMainWidth() + getSubItemWidth();
+        _options.MWidthPx = getM_WidthPx();
+        _options.WBoxPx = getM_WidthPx() + getSub_WidthPx();
     }
     function dnbColSliderDragging(e) {
         e = e || window.event;
@@ -160,12 +155,12 @@ const colSlider = (options) => {
 
         var _dX = e.clientX - _options.PosX1;
         if (_dX < 0) {
-            _options.ScaleUp = _options.ScaleDown.nextSibling;
+            initScaleUp(_options.ScaleDown.nextSibling);
         } else if (_dX > 0) {
-            _options.ScaleUp = _options.ScaleDown.previousSibling;
+            initScaleUp(_options.ScaleDown.previousSibling);
         }
-        _dX = _options.WidthMax - Math.abs(_dX) * 1.38;
-        _dX = _dX / _options.WidthMax;
+        _dX = _options.MWidthPx - Math.abs(_dX) * 1.38;
+        _dX = _dX / _options.MWidthPx;
         (_dX < 0.25) && (_dX = 0.25)
 
         if (!!_options.ScaleDown && !!_options.ScaleUp) {
@@ -174,10 +169,16 @@ const colSlider = (options) => {
                 dnbColSliderDragEnd();
                 return;
             }
-            _dX = _options.WidthMax * _dX;
-            setWidth(_options.ScaleDown, _dX);
-            setWidth(_options.ScaleUp, _options.WidthBox - _dX);
+            _dX = _options.MWidthPx * _dX;
+            setWidthPx(_options.ScaleDown, _dX);
+            setWidthPx(_options.ScaleUp, _options.WBoxPx - _dX);
         }
+    }
+    function initScaleUp(slibling) {
+        if(_options.ScaleUp) {
+            setWidth(_options.ScaleUp, getSubWidth());
+        }
+        _options.ScaleUp = slibling;
     }
     function dnbColSliderDragEnd(e) {
         if (_options.ScaleDown == undefined) return;
@@ -191,13 +192,18 @@ const colSlider = (options) => {
         if (_options.deltaX == undefined) return;
 
         if (_options.deltaX < 0.45) {
-            setWidth(_options.ScaleDown, getSubItemWidth());
-            setWidth(_options.ScaleUp, _options.WidthMax);
+            setWidth(_options.ScaleDown, getSubWidth());
+            setWidth(_options.ScaleUp, getM_Width());
             _options.ScaleDown.classList.remove('active');
+            var clsN = _options.ScaleDown.className.replace(`${DNB_MAINVIEW}`, `${DNB_SUBVIEW}`);
+            _options.ScaleDown.className = clsN;
+
             _options.ScaleUp.classList.add('active');
+            clsN = _options.ScaleUp.className.replace(`${DNB_SUBVIEW}`, `${DNB_MAINVIEW}`);
+            _options.ScaleUp.className = clsN;
         } else {
-            setWidth(_options.ScaleDown, _options.WidthMax);
-            setWidth(_options.ScaleUp, getSubItemWidth());
+            setWidth(_options.ScaleDown, getM_Width());
+            setWidth(_options.ScaleUp, getSubWidth());
         }
 
         _options.ScaleDown.removeEventListener('touchmove', dnbColSliderDragging);
@@ -209,40 +215,72 @@ const colSlider = (options) => {
         _options.ScaleDown = _options.ScaleUp = _options.deltaX = undefined;
         setDragScale();
     }
-
-    function getMainWidth() {
-        let _main = _options.viewWidth * 0.75;
+    function getUnit() {
+        if(typeof _options.mainWidth == 'undefined') return '%';
+        if(typeof _options.mainWidth !== 'string') return 'px';
+        if(_options.mainWidth.indexOf('%') < 0) return 'px';
+        return '%';
+    }
+    function getM_Width() {
+        let _main = _options.mainWidth;
+        if(typeof _main == 'undefined') return 75;
+        if(typeof _main == 'string' && _main.indexOf('%') > -1) {
+            _main = parseInt(_main);
+            (_main > 100 || _main < 0) && (_main = 100);
+            return Math.ceil(_main);;
+        }
+        _main = getV_Width() * 0.75;
         if (typeof _options.mainWidth == 'number') _main = _options.mainWidth;
         return Math.ceil(_main);
     }
-
-    function getSubItemWidth() {
-        let _w = _options.viewWidth - getMainWidth();
+    function getM_WidthPx(){
+        let d = document.querySelector(`.${DNB_ITEM}.active`);
+        return d.clientWidth;
+    }
+    function getSub_WidthPx() {
+        let d = document.querySelector(`.${DNB_SUBVIEW}.${DNB_ITEM}`);
+        return d.clientWidth;
+    }
+    function getV_Width(){
+        let w = _options.viewWidth;
+        if(typeof w === 'number') return w;
+        if(typeof w === 'string' && w.indexOf('%') > -1) {
+            w = parseInt(w);
+            (w > 100 || w < 0) && (w = 100);
+            return w;   // 0 -> 100%
+        };
+        if(typeof w === 'undefined' && getUnit() == '%') return 100;
+        return 320;
+    }
+    function getSubWidth() {
+        let _w;
+        if(getUnit() == '%') {
+            _w = 100 - getM_Width();
+            return _w / (sumViews() - 1);
+        }
+        _w = getV_Width() - getM_Width();
         return _w / (sumViews() - 1);
     }
     function getHeight() {
         return _options.height;
     }
-
     function sumViews() {
         return _options.slides.length;
     }
-    function setWidth(element, width) {
+    function setWidthPx(element, width) {
         if (!element) return;
         element.style.minWidth = `${width}px`;
         element.style.maxWidth = `${width}px`;
     }
+    function setWidth(element, width) {
+        if (!element) return;
+        element.style.minWidth = `${width}${getUnit()}`;
+        element.style.maxWidth = `${width}${getUnit()}`;
+    }
     function setStyle(element, isMain) {
-        element.style.overflow = 'hidden';
-        element.style.display = 'inline-block';
-        element.style.cursor = 'pointer';
-        element.style.position = 'relative';
-        var _h = getHeight();
-        element.style.minHeight = `${_h}px`;
-        element.style.maxHeight = `${_h}px`;
-        var _w = getSubItemWidth();
+        var _w = getSubWidth();
         if (isMain) {
-            _w = getMainWidth();
+            _w = getM_Width();
         }
         setWidth(element, _w);
     }
@@ -254,10 +292,10 @@ const colSlider = (options) => {
             _e.setAttribute('data-index', `${i}`);
             setStyle(_e, i === _sIndex);
             if (i === _sIndex) {
-                _e.setAttribute('class', `${DNB_MAINVIEW} cs-item-${DATE_NOW} active`);
+                _e.setAttribute('class', `${DNB_ITEM} ${DNB_MAINVIEW} active`);
                 parent.appendChild(_e);
             } else {
-                _e.setAttribute('class', `${DNB_SUBVIEW} cs-item-${DATE_NOW}`);
+                _e.setAttribute('class', `${DNB_ITEM} ${DNB_SUBVIEW}`);
                 parent.appendChild(_e);
             }
             getBg(getItem(i), _e);
@@ -269,8 +307,6 @@ const colSlider = (options) => {
         let _e = document.createElement('DIV');
         _e.setAttribute('class', DNB_ITEM_BG);
         _e.style.backgroundImage = `url(${img.src})`;
-        _e.style.width = `${getMainWidth() + 23}px`;
-        _e.style.height = `${getHeight() + 23}px`;
         parent.appendChild(_e);
     }
     function renderFlexBox(parent) {
@@ -288,8 +324,8 @@ const colSlider = (options) => {
         _e.src = img.src;
         _e.alt = img.alt || 'image for preview';
         _e.style.index = 1;
+        _e.style.borderRadius = '3px';
         _e.style.maxHeight = `${getHeight()}px`;
-        _e.style.maxWidth = `${getMainWidth()}px`;
         parent.appendChild(_e);
     }
     function genBoxAndItems(parent) {
@@ -299,6 +335,9 @@ const colSlider = (options) => {
         _e.style.borderRadius = `${_br}px`;
         _e.style.overflow = 'hidden';
         _e.style.height = `${getHeight()}px`;
+        if(typeof _options.viewWidth == 'number') {
+            _e.style.width = `${_options.viewWidth}px`;
+        }
         parent.appendChild(_e);
         genViewMainAndSubs(_e);
     }

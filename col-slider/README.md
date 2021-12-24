@@ -10,11 +10,10 @@
 3. call function with important params then set parent element use class name or id
     ```
     colSlider({
-        slides: images,
-        viewWidth: 640
+        slides: images
     }).append('.parentClassName');
     ```
-4. In web application: User can click/touch down and drag horizontal to move on the left/right view
+4. In web application: User can click/touch down and drag horizontal to move on the left/right
 5. Happy codding!!!
 
 > Demo in React app
@@ -47,7 +46,7 @@ function MainBody() {
         ];
         colSlider({
         slides: imgs,
-        viewWidth: 640
+        mainWidth: '75%' //, viewWidth: 800
         }).append('.App-header');
     });
     return (
@@ -62,4 +61,7 @@ function MainBody() {
 
 ### Source code [Github](https://github.com/front-end-2021/npm-pkg/tree/main/col-slider)
 
-###### The version 1.0.x present images
+##### The version 1.1.2 (allow mainWidth undefined)
+##### The version 1.1.1 (mainWidth is string or number)
+###### The version 1.x.x present images
+###### The version 2.x.x present and expand/view images
