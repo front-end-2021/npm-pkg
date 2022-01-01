@@ -1,20 +1,27 @@
 ### The package is present images by slide image in frame divided by column around the center view
    ![test col-slider package](https://live.staticflickr.com/65535/51761145941_091d74543c.jpg)
 ### Usage    
-1. import { colSlider } from "col-slider"
-2. Get array image
+1. Install npm package: 
+    ```
+    npm i col-slider
+    ```
+2. Import in project: 
+    ```
+    import { colSlider } from "col-slider"
+    ```
+3. Get array image
     ```
     const images = [{src: "img url"}]
     ```
     i. Item is object has src property
-3. call function with important params then set parent element use class name or id
+4. call function with important params then set parent element use class name or id
     ```
     colSlider({
         slides: images
     }).append('.parentClassName');
     ```
-4. In web application: User can click/touch down and drag horizontal to move on the left/right
-5. Happy codding!!!
+5. In web application: User can click/touch down and drag horizontal to move on the left/right
+6. Happy codding!!!
 
 > Demo in React app
 ```
