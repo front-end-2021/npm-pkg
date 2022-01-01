@@ -47,7 +47,7 @@ function MainBody() {
         colSlider({
         slides: imgs,
         mainWidth: '75%' //, viewWidth: 800
-        }).append('.App-header');
+        }).append('.dnbBody');
     });
     return (
         <div className="dnbBody">
@@ -57,11 +57,42 @@ function MainBody() {
 }
 
 ```
+
+> Version 1.2.0 - output active index in function onDragEnd
+```
+//import React, { useState, useEffect } from 'react';
+function MainBody() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const imgs = [
+            { src: 'https://live.staticflickr.com/65535/51728456656_7e4105ffc0.jpg' },
+            { src: 'https://live.staticflickr.com/65535/51728456656_7e4105ffc0.jpg' },
+            { src: 'https://live.staticflickr.com/65535/51728456656_7e4105ffc0.jpg' },
+            { src: 'https://live.staticflickr.com/65535/51728456656_7e4105ffc0.jpg' },
+            { src: 'https://live.staticflickr.com/65535/51728456656_7e4105ffc0.jpg' },
+            { src: 'https://live.staticflickr.com/65535/51728456656_7e4105ffc0.jpg' }
+        ];
+    colSlider({
+      slides: imgs, 
+      mainWidth: '75%'
+    }).append('.dnbBody').onDragEnd(function(_index){
+      setIndex(_index);
+    });
+  });
+  return (
+    <div className="dnbBody">
+      {console.log(index)}
+      <h2>Dainb demo col-slider</h2>
+    </div>
+  );
+}
+```
+
 [![Demo col-slider in React App](https://img.youtube.com/vi/G27LJT9HlbA/0.jpg)](https://www.youtube.com/watch?v=G27LJT9HlbA)
 
-### Source code [Github](https://github.com/front-end-2021/npm-pkg/tree/main/col-slider)
+### Source code [Github/col-slider](https://github.com/front-end-2021/npm-pkg/tree/main/col-slider)
 
+##### The version 1.2.0 (output active index in function onDragEnd)
 ##### The version 1.1.2 (allow mainWidth undefined)
 ##### The version 1.1.1 (mainWidth is string or number)
-###### The version 1.x.x present images
-###### The version 2.x.x present and expand/view images

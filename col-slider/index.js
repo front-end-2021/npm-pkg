@@ -30,15 +30,21 @@ const colSlider = (options) => {
     return {
         append: function (parent) {
             if (!document) return;//'This package support for web-app';
+            if (document.querySelector(`section.${DNB_COL_SLIDE}`)) return this; // check exist DOM
 
             if (!_options.style) _options.style = addStyle(parent);
             _options.element = genElements(parent);
             setDragScale();
 
-            _options.element.addEventListener('mouseup', dnbColSliderDragEnd);
-            _options.element.addEventListener('mouseleave', function (e) {
+            _options.element.onmouseup = dnbColSliderDragEnd;
+            _options.element.onmouseleave = function (e) {
                 dnbColSliderDragEnd(e);
-            });
+            };
+            return this;
+        },
+        onDragEnd: function (calback) {
+            _options.onDragEnd = function () { };
+            (typeof calback == 'function') && (_options.onDragEnd = calback);
         }
     }
     function addStyle(parent) {
@@ -69,7 +75,6 @@ const colSlider = (options) => {
         genBoxAndItems(_el);
         return _el;
     }
-
     function getElement(parent) {
         let _e = document.querySelector(`.${DNB_COL_SLIDE}`);
         if (!!_e) {
@@ -90,7 +95,6 @@ const colSlider = (options) => {
         else _e = appendParent(_e);
         return _e;
     }
-
     function appendParent(element) {
         let _e = document.createElement('SECTION');
         _e.setAttribute('id', `${DNB_COL_SLIDE}-${DATE_NOW}`);
@@ -101,7 +105,6 @@ const colSlider = (options) => {
         }
         return _e;
     }
-
     function getItem(i) {
         if (_options.slides.length > i && _options.slides[i]) {
             return _options.slides[i];
@@ -109,19 +112,17 @@ const colSlider = (options) => {
         else
             return null;
     }
-
     function setDragScale() {
         var wrap = document.querySelector(`.${DNB_BOX}`);
         var elmActive = wrap.getElementsByClassName('active');
         elmActive = elmActive[0];
         _options.ScaleDown = elmActive;
 
-        _options.ScaleDown.addEventListener('mousedown', dnbColSliderDragStart);
-        _options.ScaleDown.addEventListener('touchstart', dnbColSliderDragStart);
-        _options.ScaleDown.addEventListener('touchend', dnbColSliderDragEnd);
-        _options.ScaleDown.addEventListener('touchmove', dnbColSliderDragging);
+        _options.ScaleDown.onmousedown = dnbColSliderDragStart;
+        _options.ScaleDown.ontouchstart = dnbColSliderDragStart;
+        _options.ScaleDown.ontouchend = dnbColSliderDragEnd;
+        _options.ScaleDown.ontouchmove = dnbColSliderDragging;
     }
-
     function addTransitionAll() {
         if (!_options.ScaleDown.classList.contains('dnb-all-transition'))
             _options.ScaleDown.classList.add('dnb-all-transition');
@@ -144,7 +145,7 @@ const colSlider = (options) => {
             _options.PosX1 = e.touches[0].clientX;
         } else {
             _options.PosX1 = e.clientX;
-            _options.ScaleDown.addEventListener('mousemove', dnbColSliderDragging);
+            _options.ScaleDown.onmousemove = dnbColSliderDragging;
         }
         _options.MWidthPx = getM_WidthPx();
         _options.WBoxPx = getM_WidthPx() + getSub_WidthPx();
@@ -175,7 +176,7 @@ const colSlider = (options) => {
         }
     }
     function initScaleUp(slibling) {
-        if(_options.ScaleUp) {
+        if (_options.ScaleUp) {
             setWidth(_options.ScaleUp, getSubWidth());
         }
         _options.ScaleUp = slibling;
@@ -184,7 +185,7 @@ const colSlider = (options) => {
         if (_options.ScaleDown == undefined) return;
         if (!!e) {
             if (e.type == 'mouseup' || e.type == 'mouseleave')
-                _options.ScaleDown.removeEventListener('mousemove', dnbColSliderDragging);
+                _options.ScaleDown.onmousemove = function () { };
         }
 
         if (_options.ScaleUp == undefined) return;
@@ -201,30 +202,38 @@ const colSlider = (options) => {
             _options.ScaleUp.classList.add('active');
             clsN = _options.ScaleUp.className.replace(`${DNB_SUBVIEW}`, `${DNB_MAINVIEW}`);
             _options.ScaleUp.className = clsN;
+            _options.onDragEnd(getActiveIndex(_options.ScaleUp));
         } else {
             setWidth(_options.ScaleDown, getM_Width());
             setWidth(_options.ScaleUp, getSubWidth());
         }
 
-        _options.ScaleDown.removeEventListener('touchmove', dnbColSliderDragging);
-        _options.ScaleDown.removeEventListener('touchend', dnbColSliderDragEnd);
-        _options.ScaleDown.removeEventListener('touchstart', dnbColSliderDragStart);
-        _options.ScaleDown.removeEventListener('mousedown', dnbColSliderDragStart);
-        _options.ScaleDown.removeEventListener('mousemove', dnbColSliderDragging);
+        _options.ScaleDown.ontouchmove = function () { };
+        _options.ScaleDown.ontouchend = function () { };
+        _options.ScaleDown.ontouchstart = function () { };
+        _options.ScaleDown.onmousedown = function () { };
+        _options.ScaleDown.onmousemove = function () { };
 
         _options.ScaleDown = _options.ScaleUp = _options.deltaX = undefined;
         setDragScale();
     }
+    function getActiveIndex(elm) {
+        let dIdx = elm.getAttribute('data-index');
+        if (!dIdx) dIdx = 0;
+        dIdx = +dIdx;
+        if (Number.isNaN(dIdx)) dIdx = 0
+        return dIdx;
+    }
     function getUnit() {
-        if(typeof _options.mainWidth == 'undefined') return '%';
-        if(typeof _options.mainWidth !== 'string') return 'px';
-        if(_options.mainWidth.indexOf('%') < 0) return 'px';
+        if (typeof _options.mainWidth == 'undefined') return '%';
+        if (typeof _options.mainWidth !== 'string') return 'px';
+        if (_options.mainWidth.indexOf('%') < 0) return 'px';
         return '%';
     }
     function getM_Width() {
         let _main = _options.mainWidth;
-        if(typeof _main == 'undefined') return 75;
-        if(typeof _main == 'string' && _main.indexOf('%') > -1) {
+        if (typeof _main == 'undefined') return 75;
+        if (typeof _main == 'string' && _main.indexOf('%') > -1) {
             _main = parseInt(_main);
             (_main > 100 || _main < 0) && (_main = 100);
             return Math.ceil(_main);;
@@ -233,7 +242,7 @@ const colSlider = (options) => {
         if (typeof _options.mainWidth == 'number') _main = _options.mainWidth;
         return Math.ceil(_main);
     }
-    function getM_WidthPx(){
+    function getM_WidthPx() {
         let d = document.querySelector(`.${DNB_ITEM}.active`);
         return d.clientWidth;
     }
@@ -241,20 +250,20 @@ const colSlider = (options) => {
         let d = document.querySelector(`.${DNB_SUBVIEW}.${DNB_ITEM}`);
         return d.clientWidth;
     }
-    function getV_Width(){
+    function getV_Width() {
         let w = _options.viewWidth;
-        if(typeof w === 'number') return w;
-        if(typeof w === 'string' && w.indexOf('%') > -1) {
+        if (typeof w === 'number') return w;
+        if (typeof w === 'string' && w.indexOf('%') > -1) {
             w = parseInt(w);
             (w > 100 || w < 0) && (w = 100);
             return w;   // 0 -> 100%
         };
-        if(typeof w === 'undefined' && getUnit() == '%') return 100;
+        if (typeof w === 'undefined' && getUnit() == '%') return 100;
         return 320;
     }
     function getSubWidth() {
         let _w;
-        if(getUnit() == '%') {
+        if (getUnit() == '%') {
             _w = 100 - getM_Width();
             return _w / (sumViews() - 1);
         }
@@ -335,7 +344,7 @@ const colSlider = (options) => {
         _e.style.borderRadius = `${_br}px`;
         _e.style.overflow = 'hidden';
         _e.style.height = `${getHeight()}px`;
-        if(typeof _options.viewWidth == 'number') {
+        if (typeof _options.viewWidth == 'number') {
             _e.style.width = `${_options.viewWidth}px`;
         }
         parent.appendChild(_e);
